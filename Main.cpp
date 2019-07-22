@@ -17,6 +17,8 @@ int main()
 	cout << "Please enter full path of binary block file" << endl;
 	getline(cin, command);
 	Block* block = new Block(command.c_str());
+	
+	// Read the file to the memory. assumption file is not huge...
 	int res = block->Read_Block_To_Mem();
 	if (res != 0)
 	{
