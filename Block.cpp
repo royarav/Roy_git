@@ -31,6 +31,7 @@ Block::~Block()
 	}
 }
 
+// Read the file to the memory - assuming that the file is not huge
 int16_t Block::Read_Block_To_Mem()
 {
 	std::ifstream in(Block::file_path, std::ifstream::ate | std::ifstream::binary);
@@ -67,6 +68,8 @@ void  Block::Parse()
 	const uint8_t* position = Block::buffer;
 	uint32_t block_offset = 0;
 	Block_Chain_Header* bch = new Block_Chain_Header();
+	
+	// parse block chain header
 	bch->Parse((const char*)position);
 //	bch->Show();
 	if (bch->Check_Header() != true)
@@ -75,17 +78,23 @@ void  Block::Parse()
 		return;
 	}
 
+	// parse the block data
 	block_offset += bch->Get_Block_Chain_Header_Length();
 	Block_Msg* block_msg = new Block_Msg();
 	block_msg->Parse(position + block_offset);
 
+	// allocate sort arrays for the transactions:
+	// 1. holds transactions - key = hash
+	// 2. holds transaction - key = transaction length
 	uint16_t num_transactions = block_msg->Get_Transactions_Count();
 	Block::transactions_arr = new Sort_Array(CMP_BUFF, false, num_transactions, HASH_SIZE_BYTES);
 	Block::largest_transactions_arr = new Sort_Array(CMP_INT, true, num_transactions, sizeof(uint32_t));
 
 	block_offset += block_msg->Get_Block_Msg_Length();
+	// parse all transactions in the block
 	for (uint32_t i = 0; i < num_transactions; i++)
 	{
+	        // parse transaction calculate hash value and length and insert to sort arrays
 		Transaction_Msg* transaction = new Transaction_Msg(block_offset, i);
 		transaction->Parse(position + block_offset);
 		transaction->Calc_Hash(position + block_offset);
@@ -150,12 +159,6 @@ void  Block::Show_Transaction_By_Hash(uint8_t * hash) const
 	}
 	Sort_Element* elem = Block::transactions_arr->Get_Elem((uint16_t(res)));
 	elem->Print_Elem();
-		/*
-		Sort_Element* elem = Block::transactions_arr->Get_Elem(0);
-	uint8_t* p;
-	elem->Get_Elem(CMP_BUFF, &p);
-	INT32 res = Block::transactions_arr->Search(p);
-	*/
 }
 
 void  Block::Show_Transaction_By_Index( uint16_t index ) const
