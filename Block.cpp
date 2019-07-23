@@ -16,6 +16,7 @@ Block::Block(const char* block_file_path)
 
 	this->transactions_arr = NULL;
 	this->largest_transactions_arr = NULL;
+	this->buffer = NULL;
 
 }
 
@@ -28,6 +29,10 @@ Block::~Block()
 	if (this->largest_transactions_arr)
 	{
 		delete this->largest_transactions_arr;
+	}
+	if (this->buffer)
+	{
+		delete this->buffer;
 	}
 }
 
