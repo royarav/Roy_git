@@ -3,12 +3,12 @@
 
 Block_Msg::Block_Msg()
 {
-	Block_Msg::version = 0;
-	memset(Block_Msg::prev_block, 0, sizeof(Block_Msg::prev_block));
-	memset(Block_Msg::merkle_root, 0, sizeof(Block_Msg::merkle_root));
-	Block_Msg::timestamp = 0;
-	Block_Msg::bits = 0;
-	Block_Msg::nonce = 0;
+	this->version = 0;
+	memset(this->prev_block, 0, sizeof(this->prev_block));
+	memset(this->merkle_root, 0, sizeof(this->merkle_root));
+	this->timestamp = 0;
+	this->bits = 0;
+	this->nonce = 0;
 }
 	
 void Block_Msg::Parse(const uint8_t * buffer)
@@ -16,31 +16,31 @@ void Block_Msg::Parse(const uint8_t * buffer)
 		//	memcpy(buffer)
 	const uint8_t* p = buffer;
 
-	Block_Msg::version = read_be32(p);
+	this->version = read_be32(p);
 	p += sizeof(uint32_t);
-	memcpy(Block_Msg::prev_block, p, sizeof(Block_Msg::prev_block));
-	p += sizeof(Block_Msg::prev_block);
-	memcpy(Block_Msg::merkle_root, p, sizeof(Block_Msg::merkle_root));
-	p += sizeof(Block_Msg::merkle_root);
-	Block_Msg::timestamp = read_be32(p);
+	memcpy(this->prev_block, p, sizeof(this->prev_block));
+	p += sizeof(this->prev_block);
+	memcpy(this->merkle_root, p, sizeof(this->merkle_root));
+	p += sizeof(this->merkle_root);
+	this->timestamp = read_be32(p);
 	p += sizeof(uint32_t);
-	Block_Msg::bits = read_be32(p);
+	this->bits = read_be32(p);
 	p += sizeof(uint32_t);
-	Block_Msg::nonce = read_be32(p);
+	this->nonce = read_be32(p);
 	p += sizeof(uint32_t);
 
-	Block_Msg::transaction_count = parse_varint(&p);
-	Block_Msg::block_msg_length = p - buffer;
+	this->transaction_count = parse_varint(&p);
+	this->block_msg_length = p - buffer;
 }
 
 uint16_t Block_Msg::Get_Transactions_Count() const
 {
-	return (uint16_t)(Block_Msg::transaction_count);
+	return (uint16_t)(this->transaction_count);
 }
 
 uint32_t Block_Msg::Get_Block_Msg_Length()
 {
-	return Block_Msg::block_msg_length;
+	return this->block_msg_length;
 }
 
 

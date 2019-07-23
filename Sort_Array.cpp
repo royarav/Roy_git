@@ -12,54 +12,54 @@ int32_t Sort_Array::search(int32_t low, int32_t high, uint8_t* key) const
 		return -1;
 
 	int32_t mid = (low + high) / 2; /*low + (high - low)/2;*/
-	Sort_Array::arr[mid]->Get_Elem(Sort_Array::type, &elem_key);
-	int res = memcmp(elem_key, key, Sort_Array::elem_size);
+	this->arr[mid]->Get_Elem(this->type, &elem_key);
+	int res = memcmp(elem_key, key, this->elem_size);
 	if (res == 0)
 	{
 		return mid;
 	}
 	if (res < 0)
 	{
-		return Sort_Array::search((mid + 1), high, key);
+		return this->search((mid + 1), high, key);
 	}
-	return Sort_Array::search(low, (mid - 1), key);
+	return this->search(low, (mid - 1), key);
 }
 
 int32_t Sort_Array::Search(uint8_t* key) const
 {
-	return Sort_Array::search(0, Sort_Array::cur_element_num - 1, key);
+	return this->search(0, this->cur_element_num - 1, key);
 }
 
 int16_t Sort_Array::Insert(Sort_Element* elem)
 {
-	if (Sort_Array::cur_element_num >= Sort_Array::max_elements)
+	if (this->cur_element_num >= this->max_elements)
 		return -1;
 
 	uint8_t* key = NULL;
-	elem->Get_Elem(Sort_Array::type, &key);
-	int res = Sort_Array::search(0, Sort_Array::cur_element_num - 1, key);
-	if ((res != -1) && (Sort_Array::allow_duplicate == false) )
+	elem->Get_Elem(this->type, &key);
+	int res = this->search(0, this->cur_element_num - 1, key);
+	if ((res != -1) && (this->allow_duplicate == false) )
 	{
 		return 0;
 	}
 
 	int i;
-	for (i = Sort_Array::cur_element_num - 1; i >= 0; i--)
+	for (i = this->cur_element_num - 1; i >= 0; i--)
 	{
 		uint8_t* elem_key = NULL;
-		Sort_Array::arr[i]->Get_Elem(Sort_Array::type, &elem_key);
-		res = memcmp(key, elem_key, Sort_Array::elem_size);
+		this->arr[i]->Get_Elem(this->type, &elem_key);
+		res = memcmp(key, elem_key, this->elem_size);
 		if (res <= 0)
 		{
-			Sort_Array::arr[i + 1] = Sort_Array::arr[i];
+			this->arr[i + 1] = this->arr[i];
 		}
 		else
 		{
 			break;
 		}
 	}
-	Sort_Array::arr[i + 1] = elem;
-	Sort_Array::cur_element_num++;
+	this->arr[i + 1] = elem;
+	this->cur_element_num++;
 
 	return 0;
 }
@@ -68,7 +68,7 @@ int16_t Sort_Array::Insert(Sort_Element* elem)
 int16_t Sort_Array::Delete(uint8_t* key)
 {
 	// Find position of element to be deleted 
-	int pos = search( 0, Sort_Array::cur_element_num - 1, key);
+	int pos = search( 0, this->cur_element_num - 1, key);
 
 	if (pos == -1)
 	{
@@ -78,48 +78,48 @@ int16_t Sort_Array::Delete(uint8_t* key)
 
 	// Deleting element 
 	int i;
-	for (i = pos; i < Sort_Array::cur_element_num; i++)
-		Sort_Array::arr[i] = Sort_Array::arr[i + 1];
+	for (i = pos; i < this->cur_element_num; i++)
+		this->arr[i] = this->arr[i + 1];
 
-	Sort_Array::cur_element_num--;
+	this->cur_element_num--;
 	return 0;
 }
 
 void Sort_Array::Print() const
 {
-	for (int i = 0; i < Sort_Array::cur_element_num; i++)
+	for (int i = 0; i < this->cur_element_num; i++)
 	{
-		Sort_Array::arr[i]->Print_Elem();
+		this->arr[i]->Print_Elem();
 	}
 
 }
 
 Sort_Array::Sort_Array(CMP_TYPE_t type, bool allow_duplicate, uint16_t arr_size, uint16_t elem_size)
 {
-	Sort_Array::type = type;
-	Sort_Array::allow_duplicate = allow_duplicate;
-	Sort_Array::max_elements = arr_size;
-	Sort_Array::cur_element_num = 0;
-	Sort_Array::arr = new Sort_Element *[arr_size];
-	Sort_Array::elem_size = elem_size;
+	this->type = type;
+	this->allow_duplicate = allow_duplicate;
+	this->max_elements = arr_size;
+	this->cur_element_num = 0;
+	this->arr = new Sort_Element *[arr_size];
+	this->elem_size = elem_size;
 }
 
 Sort_Array::~Sort_Array()
 {
-	delete Sort_Array::arr;
+	delete this->arr;
 }
 
 uint16_t Sort_Array::Get_Num_Elems() const
 {
-	return Sort_Array::cur_element_num;
+	return this->cur_element_num;
 }
 
 Sort_Element* Sort_Array::Get_Elem(uint16_t index) const
 {
-	if (index >= Sort_Array::cur_element_num)
+	if (index >= this->cur_element_num)
 	{
 		cout << "Invalid index\n";
 		return NULL;
 	}
-	return Sort_Array::arr[index];
+	return this->arr[index];
 }

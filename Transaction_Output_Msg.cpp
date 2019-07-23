@@ -3,10 +3,10 @@
 
 Transaction_Output_Msg::Transaction_Output_Msg()
 {
-	Transaction_Output_Msg::value = 0;
-	Transaction_Output_Msg::pkt_script_length = 0;
-	Transaction_Output_Msg::pkt_script = NULL;
-	Transaction_Output_Msg::payload = NULL;
+	this->value = 0;
+	this->pkt_script_length = 0;
+	this->pkt_script = NULL;
+	this->payload = NULL;
 }
 
 Transaction_Output_Msg::~Transaction_Output_Msg()
@@ -18,22 +18,22 @@ void Transaction_Output_Msg::Parse(const uint8_t* buffer)
 {
 	const uint8_t* p = buffer;
 
-	Transaction_Output_Msg::value = read_be32(p);
+	this->value = read_be32(p);
 	p += sizeof(uint32_t);
-	Transaction_Output_Msg::value <<= 32;
-	Transaction_Output_Msg::value |= read_be32(p);
+	this->value <<= 32;
+	this->value |= read_be32(p);
 	p += sizeof(uint32_t);
 
-	Transaction_Output_Msg::pkt_script_length = parse_varint(&p);
+	this->pkt_script_length = parse_varint(&p);
 	// just skip
-	p += Transaction_Output_Msg::pkt_script_length;
+	p += this->pkt_script_length;
 
-	Transaction_Output_Msg::payload = p;
+	this->payload = p;
 
 }
 
 const uint8_t* Transaction_Output_Msg::Get_Payload()
 {
-	return Transaction_Output_Msg::payload;
+	return this->payload;
 }
 
