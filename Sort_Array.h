@@ -14,6 +14,7 @@ public:
 	int32_t Search(uint8_t * key) const;
 	int16_t Insert(Sort_Element* elem);
 	int16_t Delete(uint8_t* key);
+	void Delete_last();
 	void Print() const;
 	uint16_t Get_Num_Elems() const;
 	Sort_Element* Get_Elem(uint16_t index) const;

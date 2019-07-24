@@ -14,6 +14,7 @@ Transaction_Msg::Transaction_Msg(uint32_t block_offset, uint32_t sequence)
 	this->output_msgs = NULL;
 	this->lock_time = 0;
 	this->length = 0;
+	this->elem_length = 0;
 	this->large = 0;
 }
 
@@ -46,6 +47,7 @@ void Transaction_Msg::Parse(const uint8_t* buffer)
 	this->lock_time = read_be32(p);
 	p += sizeof(uint32_t);
 	this->length = p - buffer;
+	this->elem_length = this->length * -1;
 	this->large = false;
 		
 //	delete this->input_msgs;
@@ -81,7 +83,7 @@ void Transaction_Msg::Get_Elem(CMP_TYPE_t type, uint8_t** elem_p) const
 	    }
 		else
 		{
-			*elem_p = (uint8_t*)&(this->length);
+			*elem_p = (uint8_t*)&(this->elem_length);
 		}
 }
 

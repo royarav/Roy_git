@@ -16,7 +16,6 @@ Block::Block(const char* block_file_path)
 
 	this->transactions_arr = NULL;
 	this->largest_transactions_arr = NULL;
-	this->buffer = NULL;
 
 }
 
@@ -93,7 +92,7 @@ void  Block::Parse()
 	// 2. holds transaction - key = transaction length
 	uint16_t num_transactions = block_msg->Get_Transactions_Count();
 	this->transactions_arr = new Sort_Array(CMP_BUFF, false, num_transactions, HASH_SIZE_BYTES);
-	this->largest_transactions_arr = new Sort_Array(CMP_INT, true, num_transactions, sizeof(uint32_t));
+	this->largest_transactions_arr = new Sort_Array(CMP_INT, true, NUM_LARGEST_TRANSACTIONS, sizeof(uint32_t));
 
 	block_offset += block_msg->Get_Block_Msg_Length();
 	// parse all transactions in the block
@@ -105,27 +104,35 @@ void  Block::Parse()
 		transaction->Calc_Hash(position + block_offset);
 		this->transactions_arr->Insert(transaction);
 		uint32_t transaction_len = transaction->Get_Length();
-		this->largest_transactions_arr->Insert(transaction);
+		uint16_t num_elems = this->largest_transactions_arr->Get_Num_Elems();
+		if (num_elems < NUM_LARGEST_TRANSACTIONS)
+		{
+			this->largest_transactions_arr->Insert(transaction);
+		}
+		else
+		{
+			Transaction_Msg* elem = (Transaction_Msg* )(this->largest_transactions_arr->Get_Elem(num_elems - 1));
+			uint32_t transaction_length = elem->Get_Length();
+			if (transaction_length < transaction_len)
+			{
+				this->largest_transactions_arr->Delete_last();
+				this->largest_transactions_arr->Insert(transaction);
+			}
+		}
+//		this->largest_transactions_arr->Print();
 		block_offset += transaction_len;
 	}
 
 	// mark largest 100 transactions
 	int32_t num_elements = this->largest_transactions_arr->Get_Num_Elems();
 	int32_t i = num_elements - 1;
-	uint32_t count = 0;
 	while (i >= 0)
 	{
 		Sort_Element* elem = this->largest_transactions_arr->Get_Elem((uint16_t(i)));
 		Transaction_Msg* transaction = (Transaction_Msg*)elem;
 		transaction->Mark_Large();
-		count++;
-		if (count >= NUM_LARGEST_TRANSACTIONS)
-		{
-			break;
-		}
 		i--;
 	}
-
 	return;
 }
 

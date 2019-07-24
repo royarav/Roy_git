@@ -85,6 +85,11 @@ int16_t Sort_Array::Delete(uint8_t* key)
 	return 0;
 }
 
+void Sort_Array::Delete_last()
+{
+	this->cur_element_num--;
+}
+
 void Sort_Array::Print() const
 {
 	for (int i = 0; i < this->cur_element_num; i++)

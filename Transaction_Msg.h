@@ -29,6 +29,7 @@ private:
 	uint64_t trasnaction_output_count;
 	Transaction_Output_Msg* output_msgs;
 	uint32_t lock_time;
+	int32_t elem_length;
 	uint32_t length;
 	uint8_t hash[HASH_SIZE_BYTES];
 	bool large;
