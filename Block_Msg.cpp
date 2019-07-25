@@ -13,7 +13,6 @@ Block_Msg::Block_Msg()
 	
 void Block_Msg::Parse(const uint8_t * buffer)
 {
-		//	memcpy(buffer)
 	const uint8_t* p = buffer;
 
 	this->version = read_be32(p);

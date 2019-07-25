@@ -1,7 +1,7 @@
 #include "Block.h"
 #include "Block_Chain_Header.h"
 #include "Block_Msg.h"
-#include "Transaction_Msg.h"
+#include "Transaction.h"
 #include <fstream>
 #include <iterator>
 #include <algorithm>
@@ -14,25 +14,36 @@ Block::Block(const char* block_file_path)
 {
 	this->file_path = block_file_path;
 
-	this->transactions_arr = NULL;
+	this->transactions_table = NULL;
 	this->largest_transactions_arr = NULL;
-
+        this->num_transactions = 0;     
 }
 
 Block::~Block()
 {
-	if (this->transactions_arr)
+	if (this->transactions_table)
 	{
-		delete this->transactions_arr;
+		uint32_t i;
+        for( i = 0; i < this->num_transactions; i++ )
+		{
+			Transaction* transaction = (Transaction*)this->transactions_table->Get(i);
+			if(transaction)
+			{
+				delete transaction;
+			}
+        }
+		delete this->transactions_table;
 	}
+
 	if (this->largest_transactions_arr)
 	{
 		delete this->largest_transactions_arr;
 	}
 	if (this->buffer)
 	{
-		delete this->buffer;
+		delete []this->buffer;
 	}
+   
 }
 
 // Read the file to the memory - assuming that the file is not huge
@@ -72,7 +83,6 @@ void  Block::Parse()
 	const uint8_t* position = this->buffer;
 	uint32_t block_offset = 0;
 	Block_Chain_Header* bch = new Block_Chain_Header();
-	
 	// parse block chain header
 	bch->Parse((const char*)position);
 //	bch->Show();
@@ -84,25 +94,25 @@ void  Block::Parse()
 
 	// parse the block data
 	block_offset += bch->Get_Block_Chain_Header_Length();
+    delete bch;
 	Block_Msg* block_msg = new Block_Msg();
 	block_msg->Parse(position + block_offset);
-
-	// allocate sort arrays for the transactions:
-	// 1. holds transactions - key = hash
-	// 2. holds transaction - key = transaction length
-	uint16_t num_transactions = block_msg->Get_Transactions_Count();
-	this->transactions_arr = new Sort_Array(CMP_BUFF, false, num_transactions, HASH_SIZE_BYTES);
+	// allocate hash sort arrays for the transactions:
+	// 1. hash table. key = hash
+	// 2. sort array. key = transaction length
+	this->num_transactions = block_msg->Get_Transactions_Count();
+	this->transactions_table = new Hash_Table(this->num_transactions);
 	this->largest_transactions_arr = new Sort_Array(CMP_INT, true, NUM_LARGEST_TRANSACTIONS, sizeof(uint32_t));
-
 	block_offset += block_msg->Get_Block_Msg_Length();
+    delete block_msg;
 	// parse all transactions in the block
-	for (uint32_t i = 0; i < num_transactions; i++)
+	for (uint32_t i = 0; i < this->num_transactions; i++)
 	{
-	        // parse transaction calculate hash value and length and insert to sort arrays
-		Transaction_Msg* transaction = new Transaction_Msg(block_offset, i);
+	     // parse transaction calculate hash value and length and insert to sort arrays
+		Transaction* transaction = new Transaction(block_offset, i);
 		transaction->Parse(position + block_offset);
 		transaction->Calc_Hash(position + block_offset);
-		this->transactions_arr->Insert(transaction);
+		this->transactions_table->Insert((const  Hash_Element *)(transaction));
 		uint32_t transaction_len = transaction->Get_Length();
 		uint16_t num_elems = this->largest_transactions_arr->Get_Num_Elems();
 		if (num_elems < NUM_LARGEST_TRANSACTIONS)
@@ -111,7 +121,7 @@ void  Block::Parse()
 		}
 		else
 		{
-			Transaction_Msg* elem = (Transaction_Msg* )(this->largest_transactions_arr->Get_Elem(num_elems - 1));
+			Transaction* elem = (Transaction* )(this->largest_transactions_arr->Get_Elem(num_elems - 1));
 			uint32_t transaction_length = elem->Get_Length();
 			if (transaction_length < transaction_len)
 			{
@@ -119,7 +129,6 @@ void  Block::Parse()
 				this->largest_transactions_arr->Insert(transaction);
 			}
 		}
-//		this->largest_transactions_arr->Print();
 		block_offset += transaction_len;
 	}
 
@@ -129,7 +138,7 @@ void  Block::Parse()
 	while (i >= 0)
 	{
 		Sort_Element* elem = this->largest_transactions_arr->Get_Elem((uint16_t(i)));
-		Transaction_Msg* transaction = (Transaction_Msg*)elem;
+		Transaction* transaction = (Transaction*)elem;
 		transaction->Mark_Large();
 		i--;
 	}
@@ -138,7 +147,7 @@ void  Block::Parse()
 
 void  Block::Show_Transactions() const
 {
-	this->transactions_arr->Print();
+	this->transactions_table->Print();
 }
 
 void  Block::Show_Largest_Transactions() const
@@ -149,7 +158,7 @@ void  Block::Show_Largest_Transactions() const
 	while (i >= 0)
 	{
 		Sort_Element* elem = this->largest_transactions_arr->Get_Elem((uint16_t(i)));
-		Transaction_Msg* transaction = (Transaction_Msg*)elem;
+		Transaction* transaction = (Transaction*)elem;
 		transaction->Print_Elem();
 		count++;
 		if (count >= NUM_LARGEST_TRANSACTIONS)
@@ -163,20 +172,14 @@ void  Block::Show_Largest_Transactions() const
 
 void  Block::Show_Transaction_By_Hash(uint8_t * hash) const
 {
-	int32_t res = this->transactions_arr->Search(hash);
-	if (res < 0)
+	string hash_str = string((const char*)hash, HASH_SIZE_BYTES);
+	Hash_Element* elem = this->transactions_table->Find(&hash_str);
+	if (elem == NULL)
 	{
 		cout << "Hash not found" << endl;
 		return;
 	}
-	Sort_Element* elem = this->transactions_arr->Get_Elem((uint16_t(res)));
-	elem->Print_Elem();
-}
 
-void  Block::Show_Transaction_By_Index( uint16_t index ) const
-{
-	Sort_Element* elem = this->transactions_arr->Get_Elem((uint16_t(index)));
-	Transaction_Msg* transaction = (Transaction_Msg*)elem;
-	transaction->Print_Elem();
+	elem->Print_Hash_Key();
 }
 

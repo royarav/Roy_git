@@ -12,7 +12,6 @@ Block_Chain_Header::Block_Chain_Header()
 
 void Block_Chain_Header::Parse(const char* buffer)
 {
-//	memcpy(buffer)
 	const char* p = buffer;
 
 	this->magic_id = read_be32(p);

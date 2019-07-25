@@ -10,10 +10,9 @@ using namespace std;
 int main()
 {
 	string command;
-	//    std::cout << "Start block!\n";
 //	"F:\\Roy\\code\\ConsoleApplication1\\sample_block_bin"
 
-	cout << "Welcome to bloxroute" << endl;
+	cout << "Welcome to bloxroute!" << endl;
 	cout << "Please enter full path of binary block file" << endl;
 	getline(cin, command);
 	Block* block = new Block(command.c_str());
@@ -69,6 +68,7 @@ int main()
 
 	}
 	delete block;
+	cout << "End Program " << endl;
 	return 0;
 }
 

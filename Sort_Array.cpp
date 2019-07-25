@@ -30,7 +30,7 @@ int32_t Sort_Array::Search(uint8_t* key) const
 	return this->search(0, this->cur_element_num - 1, key);
 }
 
-int16_t Sort_Array::Insert(Sort_Element* elem)
+int16_t Sort_Array::Insert(const Sort_Element* elem)
 {
 	if (this->cur_element_num >= this->max_elements)
 		return -1;
@@ -58,7 +58,7 @@ int16_t Sort_Array::Insert(Sort_Element* elem)
 			break;
 		}
 	}
-	this->arr[i + 1] = elem;
+	this->arr[i + 1] = (Sort_Element * )elem;
 	this->cur_element_num++;
 
 	return 0;
@@ -111,7 +111,7 @@ Sort_Array::Sort_Array(CMP_TYPE_t type, bool allow_duplicate, uint16_t arr_size,
 
 Sort_Array::~Sort_Array()
 {
-	delete this->arr;
+	delete []this->arr;
 }
 
 uint16_t Sort_Array::Get_Num_Elems() const

@@ -4,6 +4,7 @@
 
 #include "types.h"
 #include "Sort_Array.h"
+#include "Hash_Table.h"
 
 class Block
 {
@@ -18,14 +19,14 @@ public:
 	void Show_Transactions() const;
 	void Show_Largest_Transactions() const;
 	void Show_Transaction_By_Hash(uint8_t * hash) const;
-	void Show_Transaction_By_Index(uint16_t index) const;
 
 private:
 	const char* file_path;
 	const uint8_t* buffer;
-	Sort_Array* transactions_arr;
+    uint32_t num_transactions;
+//	Sort_Array* transactions_arr;
+	Hash_Table* transactions_table;
 	Sort_Array* largest_transactions_arr;
-
 	uint32_t Get_File_Size();
 
 };
