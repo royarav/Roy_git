@@ -71,7 +71,7 @@ void Transaction::Calc_Hash(const uint8_t* buffer)
 	SHA256(buffer, this->length, first_sha);
 	SHA256(first_sha, sizeof(first_sha), second_sha);
 	memcpy(this->hash, second_sha, HASH_SIZE_BYTES);
-	this->hash[HASH_SIZE_BYTES] = NULL;
+	this->hash[HASH_SIZE_BYTES] = '\0';
 	this->hash_key = new string((char *)this->hash);
 }
 
